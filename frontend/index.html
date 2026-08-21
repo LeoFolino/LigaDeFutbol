@@ -1,0 +1,315 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Eva Peron League Manager</title>
+    <link rel="stylesheet" href="/assets/styles.css?v=20260726-active-tabs" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar">
+        <div class="brand">
+          <span class="brand-mark" aria-hidden="true">EPL</span>
+          <div>
+            <p class="eyebrow">Eva Peron League</p>
+            <h1>League Manager</h1>
+          </div>
+        </div>
+
+        <section class="budget-panel">
+          <span>Presupuesto</span>
+          <strong id="remainingBudget">$0M</strong>
+          <div class="budget-bar">
+            <div id="budgetFill"></div>
+          </div>
+          <dl>
+            <div><dt>Inicial</dt><dd id="initialBudget">$300M</dd></div>
+            <div><dt>Gastado</dt><dd id="spentBudget">$0M</dd></div>
+            <div><dt>Mercado</dt><dd id="marketBudget">$0M</dd></div>
+            <div><dt>Sueldos</dt><dd id="salaryBudget">$0M</dd></div>
+          </dl>
+        </section>
+
+        <section class="nav-panel">
+          <h2>Vistas</h2>
+          <div class="side-nav" aria-label="Vistas principales">
+            <button id="teamsTab" class="active secondary" type="button">Equipos</button>
+            <button id="globalTab" class="secondary" type="button">Base global</button>
+            <button id="calculatorTab" class="secondary" type="button">Calculadora</button>
+          </div>
+        </section>
+
+        <section class="scale-panel">
+          <h2>Sueldos por media</h2>
+          <div class="salary-scale">
+            <span>90+ $16M</span><span>89 $12M</span><span>88 $8M</span>
+            <span>87 $7M</span><span>86 $6M</span><span>85 $5M</span>
+            <span>84 $4M</span><span>83 $3M</span><span>82 $2M</span>
+            <span>81 $1M</span><span>80 $750K</span><span>79 $500K</span>
+            <span>78 $250K</span><span>77 $100K</span><span>76 $75K</span>
+            <span>75 $50K</span><span>74- $25K</span>
+          </div>
+        </section>
+      </aside>
+
+      <main class="content">
+        <header class="toolbar">
+          <div>
+            <p class="eyebrow">Temporada 1</p>
+            <h2>Equipos, planteles y base global</h2>
+          </div>
+        </header>
+
+        <section id="teamsView">
+          <div class="teams-layout">
+            <aside class="teams-panel">
+              <div class="panel-heading">
+                <div>
+                  <p class="eyebrow">Liga</p>
+                  <h2>Equipos</h2>
+                </div>
+                <button id="newTeam" class="secondary" type="button">Nuevo</button>
+              </div>
+
+              <form id="teamForm" class="team-form">
+                <label>Nombre<input id="teamNameInput" placeholder="Ej: Burruchaga FC" /></label>
+                <label>Owner/admin<input id="teamOwnerInput" placeholder="Nombre del manager" /></label>
+                <label>Logo URL<input id="teamLogoUrlInput" placeholder="/api/teams/... o https://..." /></label>
+                <label>Subir escudo<input id="teamLogoFileInput" type="file" accept="image/png,image/jpeg,image/jpg,image/webp" /></label>
+                <button id="saveTeam" type="button">Guardar equipo</button>
+                <button id="deleteTeam" class="danger" type="button">Borrar equipo</button>
+              </form>
+
+              <div id="teamsList" class="teams-list"></div>
+            </aside>
+
+            <section class="roster-panel">
+              <header class="roster-header" id="selectedTeamHeader"></header>
+              <div class="quick-add roster-add">
+                <label>
+                  Agregar jugador
+                  <span class="autocomplete-field">
+                    <input id="teamPlayerSearchInput" type="search" placeholder="Nombre o ID SoFIFA" autocomplete="off" />
+                    <span id="teamPlayerSuggestions" class="autocomplete-list" hidden></span>
+                  </span>
+                </label>
+                <button id="addTeamPlayer" type="button">Agregar al equipo</button>
+              </div>
+
+              <section class="table-wrap roster-table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Jugador</th>
+                      <th>SoFIFA</th>
+                      <th>Transfermarkt</th>
+                      <th>Costos</th>
+                      <th>Atributos</th>
+                      <th>Links</th>
+                      <th></th>
+                    </tr>
+                  </thead>
+                  <tbody id="teamPlayersTable"></tbody>
+                </table>
+              </section>
+            </section>
+          </div>
+        </section>
+
+        <section id="globalView" hidden>
+          <div class="global-summary" id="globalSummary"></div>
+          <div class="import-panel" hidden>
+            <label>
+              CSV local
+              <input id="csvPathInput" value="data/raw/players.csv" />
+            </label>
+            <label>
+              Dataset
+              <input id="sourceDatasetInput" placeholder="Ej: fc-26-fifa-26-player-data" />
+            </label>
+            <label>
+              Version
+              <input id="sourceVersionInput" placeholder="Ej: 2026-07-16" />
+            </label>
+            <button id="importCsvPlayers" type="button">Importar CSV</button>
+          </div>
+          <div class="sync-panel">
+            <div>
+              <span class="eyebrow">Transfermarkt</span>
+              <strong>Actualizar valores de mercado</strong>
+            </div>
+            <label>
+              Jugadores por tanda
+              <input id="tmBatchLimitInput" type="number" min="1" max="25000" value="100" />
+            </label>
+            <label>
+              Workers
+              <input id="tmWorkersInput" type="number" min="1" max="10" value="10" />
+            </label>
+            <label class="inline-check">
+              <input id="tmSkipUpdatedInput" type="checkbox" checked />
+              Solo pendientes
+            </label>
+            <button id="refreshTransfermarktBatch" type="button">Actualizar valores TM</button>
+            <div class="sync-progress" id="tmProgress" hidden>
+              <div class="sync-progress-top">
+                <strong id="tmProgressTitle">Transfermarkt</strong>
+                <span id="tmProgressCount">0/0 - 0%</span>
+              </div>
+              <div class="sync-progress-bar">
+                <div id="tmProgressFill"></div>
+              </div>
+              <span id="tmProgressDetail">Esperando tanda...</span>
+            </div>
+          </div>
+          <div class="quick-add">
+            <label>
+              Buscar
+              <span class="autocomplete-field">
+                <input id="globalSearchInput" type="search" placeholder="Nombre, club, ID SoFIFA..." autocomplete="off" />
+                <span id="globalPlayerSuggestions" class="autocomplete-list" hidden></span>
+              </span>
+            </label>
+            <label>
+              Posicion
+              <input id="globalPositionInput" placeholder="Ej: ST, CB, RW" />
+            </label>
+            <label>
+              Media minima
+              <input id="globalMinOverallInput" type="number" min="1" max="99" />
+            </label>
+            <label>
+              Valor max M
+              <input id="globalMaxValueInput" type="number" min="0" step="0.1" />
+            </label>
+            <label>
+              Transfermarkt
+              <select id="globalTmStatusInput">
+                <option value="all">Todos</option>
+                <option value="failed">Fallidos</option>
+                <option value="warning">Warnings</option>
+                <option value="no_value">Sin valor</option>
+                <option value="generic">GenÃ©ricos</option>
+                <option value="retired">Retirados</option>
+                <option value="pending">Pendientes</option>
+                <option value="match">OK</option>
+              </select>
+            </label>
+            <button id="addGlobalPlayer" type="button">Agregar jugador</button>
+          </div>
+          <section class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Jugador</th>
+                  <th>SoFIFA</th>
+                  <th>Transfermarkt</th>
+                  <th>Costos</th>
+                  <th>Atributos</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="globalPlayersTable"></tbody>
+            </table>
+          </section>
+          <footer class="pagination-bar">
+            <button id="prevGlobalPage" class="secondary" type="button">Anterior</button>
+            <span id="globalPageInfo" class="muted">Pagina 1</span>
+            <button id="nextGlobalPage" class="secondary" type="button">Siguiente</button>
+          </footer>
+        </section>
+
+        <section id="calculatorView" hidden>
+          <div class="calculator-panel">
+            <div>
+              <p class="eyebrow">Simulacion</p>
+              <h2>Calculadora de plantel</h2>
+              <span class="muted">Arma un equipo de prueba sin modificar los equipos reales.</span>
+            </div>
+            <div class="quick-add">
+              <label>
+                Agregar jugador
+                <span class="autocomplete-field">
+                  <input id="calculatorPlayerInput" type="search" placeholder="Nombre o ID SoFIFA" autocomplete="off" />
+                  <span id="calculatorPlayerSuggestions" class="autocomplete-list" hidden></span>
+                </span>
+              </label>
+              <button id="addCalculatorPlayer" type="button">Agregar</button>
+              <button id="clearCalculator" class="secondary" type="button">Limpiar</button>
+            </div>
+            <div id="calculatorSummary" class="calculator-summary"></div>
+            <section class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Jugador</th>
+                    <th>SoFIFA</th>
+                    <th>Transfermarkt</th>
+                    <th>Costos</th>
+                    <th>Atributos</th>
+                    <th>Links</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody id="calculatorPlayersTable"></tbody>
+              </table>
+            </section>
+          </div>
+        </section>
+
+      </main>
+    </div>
+
+    <dialog id="globalDialog">
+      <form method="dialog" id="globalForm">
+        <header>
+          <div>
+            <p class="eyebrow" id="globalEditMeta">Base global</p>
+            <h2 id="globalEditTitle">Jugador</h2>
+          </div>
+          <button type="button" id="closeGlobalDialog" aria-label="Cerrar">x</button>
+        </header>
+
+        <div class="form-grid">
+          <label>Nombre<input name="name" required /></label>
+          <label>Posicion<input name="position" /></label>
+          <label>Club real<input name="club" /></label>
+          <label>Nacionalidad<input name="nationality" /></label>
+          <label>SoFIFA ID<input name="sofifa_id" /></label>
+          <label>Version SoFIFA<input name="sofifa_version" placeholder="2026-07-16" /></label>
+          <label>Media<input name="overall" type="number" min="1" max="99" /></label>
+          <label>Valor Transfermarkt en M<input name="market_value_m" type="number" min="0" step="0.001" /></label>
+          <label>Moneda<input name="market_value_currency" placeholder="EUR" /></label>
+          <label>Fecha valor<input name="market_value_checked_at" type="date" /></label>
+          <label>Skill moves<input name="skill_moves" type="number" min="1" max="5" /></label>
+          <label>Pie malo<input name="weak_foot" type="number" min="1" max="5" /></label>
+          <label>Reputacion internacional<input name="international_reputation" type="number" min="1" max="5" /></label>
+          <label>Tipo de aceleracion<input name="acceleration_type" /></label>
+          <label>Tipo de cuerpo<input name="body_type" /></label>
+          <label>Clausula en M<input name="release_clause_m" type="number" min="0" step="0.001" /></label>
+          <label>Ritmo<input name="pace" type="number" min="1" max="99" /></label>
+          <label>Tiro<input name="shooting" type="number" min="1" max="99" /></label>
+          <label>Pase<input name="passing" type="number" min="1" max="99" /></label>
+          <label>Regate<input name="dribbling" type="number" min="1" max="99" /></label>
+          <label>Defensa<input name="defending" type="number" min="1" max="99" /></label>
+          <label>Fisico<input name="physical" type="number" min="1" max="99" /></label>
+          <label>URL SoFIFA<input name="sofifa_url" /></label>
+          <label>URL Transfermarkt<input name="transfermarkt_url" /></label>
+          <label class="wide">PlayStyles<input name="play_styles" /></label>
+          <label class="wide">Tags<input name="tags" placeholder="rapido, barato, promesa" /></label>
+          <label class="wide">Notas<textarea name="notes" rows="3"></textarea></label>
+        </div>
+
+        <section id="globalAttributeDetails" class="attribute-details" aria-label="Atributos detallados"></section>
+
+        <footer>
+          <button type="button" id="fetchSofifaForForm" class="secondary">Completar desde SoFIFA</button>
+          <button type="button" id="saveGlobalEdit">Guardar</button>
+        </footer>
+      </form>
+    </dialog>
+
+    <script src="/assets/app.js?v=20260821-core-cleanup"></script>
+  </body>
+</html>
