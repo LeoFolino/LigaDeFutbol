@@ -1,6 +1,6 @@
 # Liga Profesional de Futbol | Manager
 
-Gestor local de equipos, planteles y jugadores de Eva Peron League.
+Gestor local de equipos, planteles y jugadores de la liga.
 
 ## Funciones
 
@@ -228,7 +228,7 @@ Actualizar todos los jugadores es posible en tandas, pero puede tardar muchas ho
 
 ## Actualizar valores desde Transfermarkt
 
-Cada jugador global puede actualizar su valor desde el link de Transfermarkt guardado en la base. Ese valor reemplaza el valor de SoFIFA para calcular el costo de Eva Peron League:
+Cada jugador global puede actualizar su valor desde el link de Transfermarkt guardado en la base. Ese valor reemplaza el valor de SoFIFA para calcular el costo de la liga:
 
 ```text
 costo total = valor Transfermarkt + sueldo por media SoFIFA
