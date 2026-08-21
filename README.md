@@ -1,4 +1,4 @@
-# Eva Peron League Manager
+# Liga Profesional de Futbol | Manager
 
 Gestor local de equipos, planteles y jugadores de Eva Peron League.
 
