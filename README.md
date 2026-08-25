@@ -2,6 +2,11 @@
 
 Gestor local de equipos, planteles y jugadores de la liga.
 
+## Arquitectura
+
+La arquitectura objetivo y sus decisiones operativas están documentadas en
+[`docs/adr/0001-arquitectura-objetivo.md`](docs/adr/0001-arquitectura-objetivo.md).
+
 ## Funciones
 
 - Presupuesto inicial de `$300M`.
