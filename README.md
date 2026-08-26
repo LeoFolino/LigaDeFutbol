@@ -92,6 +92,32 @@ Despues abrir:
 ```text
 http://127.0.0.1:8000
 ```
+## Pruebas
+
+Las pruebas de regresión utilizan una base SQLite temporal y no modifican la
+base de datos real del proyecto.
+
+Instalar las dependencias de desarrollo:
+
+```bash
+python -m pip install -r requirements-dev.txt
+```
+
+Ejecutar todas las pruebas con un único comando:
+
+```bash
+python -m pytest
+```
+
+No es necesario iniciar Uvicorn para ejecutar las pruebas.
+
+La suite comprueba:
+
+* Jugadores: creación, búsqueda, edición, eliminación y validación.
+* Equipos y asignaciones.
+* Presupuesto y escala salarial.
+* Búsqueda, filtros y paginación.
+* Carga básica de Equipos, Base global y Calculadora.
 
 ## Uso en vivo
 
