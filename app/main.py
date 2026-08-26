@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import base64
 import json
 import re
 import sqlite3
@@ -7,9 +8,7 @@ import threading
 import time
 import unicodedata
 import uuid
-import base64
-from datetime import date
-from datetime import datetime, timezone
+from datetime import date, datetime, timezone
 from difflib import SequenceMatcher
 from pathlib import Path
 from typing import Any
@@ -20,10 +19,24 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, Response
 from fastapi.staticfiles import StaticFiles
-from pydantic import BaseModel, Field
 
 from app.config import SOFIFA_LOCALE, SOFIFA_VERSION_URL_PART, TRANSFERMARKT_BATCH_LIMIT
 from app.importer import ensure_schema, import_players_csv
+from app.modules.players.schemas import GlobalPlayerCreate, GlobalPlayerPatch
+from app.modules.scans.schemas import (
+    CsvImportRequest,
+    FetchRequest,
+    SofifaFetchRequest,
+    TransfermarktBatchRequest,
+    TransfermarktFetchRequest,
+)
+from app.modules.teams.schemas import (
+    TeamAssignPlayer,
+    TeamCreate,
+    TeamLogoPayload,
+    TeamPatch,
+)
+
 ROOT = Path(__file__).resolve().parents[1]
 DATA_DIR = ROOT / "app" / "data"
 GLOBAL_PLAYERS_FILE = DATA_DIR / "global_players.json"
@@ -61,123 +74,6 @@ SALARY_BY_OVERALL_M = [
     (76, 0.075),
     (75, 0.05),
 ]
-
-
-class GlobalPlayerCreate(BaseModel):
-    name: str = Field(min_length=1)
-    position: str = ""
-    club: str = ""
-    nationality: str = ""
-    sofifa_id: str = ""
-    sofifa_url: str = ""
-    sofifa_version: str = ""
-    transfermarkt_url: str = ""
-    image_url: str = ""
-    overall: int | None = Field(default=None, ge=1, le=99)
-    market_value_m: float | None = Field(default=None, ge=0)
-    market_value_currency: str = "EUR"
-    market_value_checked_at: str = ""
-    weak_foot: int | None = Field(default=None, ge=1, le=5)
-    skill_moves: int | None = Field(default=None, ge=1, le=5)
-    international_reputation: int | None = Field(default=None, ge=1, le=5)
-    body_type: str = ""
-    real_face: str = ""
-    release_clause_m: float | None = Field(default=None, ge=0)
-    acceleration_type: str = ""
-    play_styles: str = ""
-    specialities: str = ""
-    roles: list[str] = Field(default_factory=list)
-    pace: int | None = Field(default=None, ge=1, le=99)
-    shooting: int | None = Field(default=None, ge=1, le=99)
-    passing: int | None = Field(default=None, ge=1, le=99)
-    dribbling: int | None = Field(default=None, ge=1, le=99)
-    defending: int | None = Field(default=None, ge=1, le=99)
-    physical: int | None = Field(default=None, ge=1, le=99)
-    tags: list[str] = Field(default_factory=list)
-    notes: str = ""
-
-
-class GlobalPlayerPatch(BaseModel):
-    name: str | None = Field(default=None, min_length=1)
-    position: str | None = None
-    club: str | None = None
-    nationality: str | None = None
-    sofifa_id: str | None = None
-    sofifa_url: str | None = None
-    sofifa_version: str | None = None
-    transfermarkt_url: str | None = None
-    image_url: str | None = None
-    overall: int | None = Field(default=None, ge=1, le=99)
-    market_value_m: float | None = Field(default=None, ge=0)
-    market_value_currency: str | None = None
-    market_value_checked_at: str | None = None
-    weak_foot: int | None = Field(default=None, ge=1, le=5)
-    skill_moves: int | None = Field(default=None, ge=1, le=5)
-    international_reputation: int | None = Field(default=None, ge=1, le=5)
-    body_type: str | None = None
-    real_face: str | None = None
-    release_clause_m: float | None = Field(default=None, ge=0)
-    acceleration_type: str | None = None
-    play_styles: str | None = None
-    specialities: str | None = None
-    roles: list[str] | None = None
-    pace: int | None = Field(default=None, ge=1, le=99)
-    shooting: int | None = Field(default=None, ge=1, le=99)
-    passing: int | None = Field(default=None, ge=1, le=99)
-    dribbling: int | None = Field(default=None, ge=1, le=99)
-    defending: int | None = Field(default=None, ge=1, le=99)
-    physical: int | None = Field(default=None, ge=1, le=99)
-    tags: list[str] | None = None
-    notes: str | None = None
-
-
-class FetchRequest(BaseModel):
-    url: str
-
-
-class SofifaFetchRequest(BaseModel):
-    url_or_id: str
-
-
-class TransfermarktFetchRequest(BaseModel):
-    url: str
-    expected_name: str = ""
-
-
-class TransfermarktBatchRequest(BaseModel):
-    limit: int = Field(default=TRANSFERMARKT_BATCH_LIMIT, ge=1, le=25000)
-    skip_updated: bool = True
-    stop_after_consecutive_failures: int = Field(default=5, ge=0, le=50)
-
-
-class CsvImportRequest(BaseModel):
-    csv_path: str = "data/raw/players.csv"
-    source_dataset: str = ""
-    source_version: str = ""
-
-
-class TeamCreate(BaseModel):
-    name: str = Field(min_length=1)
-    owner: str = ""
-    logo_url: str = ""
-
-
-class TeamPatch(BaseModel):
-    name: str | None = Field(default=None, min_length=1)
-    owner: str | None = None
-    logo_url: str | None = None
-
-
-class TeamAssignPlayer(BaseModel):
-    query: str | None = None
-    player_id: str | None = None
-    sofifa_id: str | None = None
-    force: bool = False
-
-
-class TeamLogoPayload(BaseModel):
-    filename: str
-    data_url: str
 
 
 app = FastAPI(title="Eva Peron League Manager")
